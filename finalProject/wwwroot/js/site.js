@@ -1,4 +1,138 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿function getChart(dates, prices, vols, avgprice, avgvol) {
+    var ctx = document.getElementById("myChart").getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: dates.split(","),
+            datasets: [{
+                label: 'High Prices',
+                yAxisID: 'H',
+                data: prices.split(","),
+                type: 'line',
+                borderColor: 'rgba(0, 103, 71, 1)',
+                backgroundColor: 'rgba(0, 103, 71, 0.1)',
+                lineTension: 0
+            },
+            {
+                label: 'Volumes (Mn)',
+                data: vols.split(","),
+                borderColor: 'rgba(0, 0, 250, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: false,
+            scales: {
+                yAxes: [{
+                    id: 'H',
+                    type: 'linear',
+                    position: 'left',
+                }]
+            },
+            annotation: {
+                drawTime: 'afterDatasetsDraw',
+                annotations: [
+                    {
+                        id: 'highprice',
+                        type: 'line',
+                        mode: 'horizontal',
+                        scaleID: 'H',
+                        value: avgprice,
+                        borderColor: 'green',
+                        borderWidth: 1,
+                        label: {
+                            backgroundColor: "green",
+                            content: "Mean: $" + avgprice,
+                            enabled: true
+                        }
+                    },
+                    {
+                        id: 'volume',
+                        type: 'line',
+                        mode: 'horizontal',
+                        scaleID: 'H',
+                        value: avgvol,
+                        borderColor: 'blue',
+                        borderWidth: 1,
+                        label: {
+                            backgroundColor: "blue",
+                            content: "Mean Volume: " + avgvol + "(Mn)",
+                            enabled: true
+                        }
+                    }]
+            }
+        }
+    });
+}
 
-// Write your JavaScript code.
+function getStock(symbols, priceRangeRates) {
+
+    var canvasStock = document.getElementById("myStock").getContext('2d');
+    var myStock = new Chart(canvasStock, {
+        type: 'bar',
+        data: {
+            labels: symbols.split(","),
+            datasets: [{
+                label: 'price score',
+                yAxisID: 'H',
+                data: priceRangeRates.split(","),
+                type: 'line',
+                borderColor: 'rgba(0, 103, 71, 1)',
+                backgroundColor: 'rgba(0, 103, 71, 0.1)',
+                lineTension: 0
+            }]
+        },
+        options: {
+            animation: {
+                duration: 0
+            },
+            responsive: false,
+            scales: {
+                yAxes: [{
+                    id: 'H',
+                    type: 'linear',
+                    position: 'left',
+                }]
+            },
+            annotation: {
+                drawTime: 'afterDatasetsDraw',
+                annotations: [
+                    {
+                        id: 'highprice',
+                        type: 'line',
+                        mode: 'horizontal',
+                        scaleID: 'H',
+                        value: 0.82,
+                        borderColor: 'red',
+                        borderWidth: 1,
+                        label: {
+                            backgroundColor: "red",
+                            content: "0.82",
+                            enabled: true,
+                            position: 'left'
+                        }
+                    }, {
+                        id: 'lowprice',
+                        type: 'line',
+                        mode: 'horizontal',
+                        scaleID: 'H',
+                        value: 0.41,
+                        borderColor: 'red',
+                        borderWidth: 1,
+                        label: {
+                            backgroundColor: "red",
+                            content: "0.41",
+                            enabled: true,
+                            position: 'left'
+                        }
+                    }]
+            }
+        }
+    });
+
+}
+function alertDbSave(success) {
+    if (success === 1) {
+        alert("Data saved successfully");
+    }
+}

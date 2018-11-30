@@ -1,0 +1,76 @@
+﻿
+@model IEXTrading.Models.ViewModel.RecommendStock
+
+@{
+    ViewData["Title"] = "recommend";
+}
+
+<h2>Recommendation</h2>
+<hr />
+<span style="font-size:14px;">
+    <b style="font-size:16px;" >
+        52-Week Price Range Recommendation Strategy:
+    </b>
+    <br />
+    A simple way to measure price momentum is to consider the proximity of a stock to its 52-week high or low.
+    <br />
+    The formula I used for this was current price minus 52-week low divided by 52-week high minus 52-week low.
+    <br />
+    Stocks that score 82% or higher on this formula tend to outperform, while stocks that score 41% or lower
+    <br />
+    tend to underperform.
+</span>
+
+
+
+
+@if (Model.Companies != null)
+{
+
+
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    The stocks you better to choose:
+                    <table>
+                        <tr>
+                            <td>
+                                Symbol
+                            </td>
+                            <td>
+                                price score
+                            </td>
+                        </tr>
+                        @for (int i = 0; i < Model.Companies.ToArray().Length; i++)
+                        {
+
+                            <tr>
+                                <td>
+                                    @Model.Companies[i].symbol
+                                </td>
+                                <td>
+                                    @Model.StockChosePrice[i]
+                                </td>
+                            </tr>
+                        }
+                        </table>
+                </td>
+                <td>
+                    <div>
+                        <canvas id="myStock" height="300" width="800"></canvas>
+                    </div>
+
+                </td>
+                <td></td>
+            </tr>
+
+        </tbody>
+    </table>
+        
+    }
+
+<script>
+    getStock("@Model.Symbol", "@Model.PriceRangeRate");
+</script>
+
