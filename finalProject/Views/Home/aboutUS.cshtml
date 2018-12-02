@@ -10,11 +10,20 @@
         <a href="https://github.com/ISM6225/2018_Fall_Assignment4_ActiveCloudSite">https://github.com/ISM6225/2018_Fall_Assignment4_ActiveCloudSite</a>
         </a>
     <li>
-        we master how to exploit MVC frame to develop application and known that chart.js has lots of properties that could help us show the information easily.
+        We mastered how to exploit MVC frame to develop application and known that chart.js has lots of properties that could help us show the information easily.
+    </li>
+    <li>
+        We mastered how to exploit Razor syntax to display information on the page.
     </li>
     <li>
         We spent another 48 hours to study the stock recommendation strategy and accomplished recommendation function.
     </li>
+    <li>
+        We modified the bug in the IEXtrading app whenever the GetSymbol method in IEXHandler tries to save more than 1000 number of records.
+        We found that if we use HttpContext.Session.SetString(SessionKeyName, companiesData) sytax to deliver data,
+        we must add  services.AddSession() and 	app.UseSession() into the startup.us file.
+    </li>
+    <li>We also learned how to delopy web Appliaction to the Azure cloud platform</li>
     <li>
         We took 52-Week Price Range Recommendation Strategy:
         <br />
@@ -26,6 +35,7 @@
         <br />
         tend to underperform.
     </li>
+    <li>In our recommend page, we let user choose the stock type to finish recommendation. We show the previous less than 10 recommended stock  on the left of web page and the less than 50 stock on the chart. </li>
     <li>
         The project was uploaded to Github:<a href="https://github.com/qing2qi/finalProject">https://github.com/qing2qi/finalProject</a>
     </li>

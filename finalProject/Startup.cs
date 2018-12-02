@@ -26,6 +26,7 @@ namespace MVCTemplate
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration["Data:IEXTrading:ConnectionString"]));
+            services.AddSession();
             services.AddMvc();
         }
 
@@ -50,7 +51,7 @@ namespace MVCTemplate
             }
 
             app.UseStaticFiles();
-
+            app.UseSession();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

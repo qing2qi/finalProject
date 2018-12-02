@@ -40,8 +40,7 @@ namespace IEXTrading.Infrastructure.IEXTradingHandler
             if (!companyList.Equals(""))
             {
                 companies = JsonConvert.DeserializeObject<List<Company>>(companyList);
-                companies = companies.GetRange(0, 20);
-                
+                //companies = companies.GetRange(0, 200);
             }
             return companies;
         }

@@ -1,0 +1,22 @@
+﻿
+@{
+    ViewData["Title"] = "recommendType";
+}
+
+<h2>Choose Stock Type</h2>
+
+<hr />
+@{
+
+    String[] stocktypeArray = { "ad", "re", "ce", "si", "lp","et","cs"};
+    String[] stocktypeName = { "American Depository Receipt", "Real Estate Investment Trust", "Closed end fund", "Secondary Issue", "Limited Partnerships",  "Exchange Traded Fund", "Common Stock" };
+} 
+        <form asp-controller="Home" asp-action="recommend" method="get">
+            <select name="stockType">
+                @for (int i = 0; i < 7; i++)
+                {
+                <option value=@stocktypeArray[i] selected>@stocktypeName[i]</option>
+                }
+            </select>
+            <input type="submit" value="Recommend" />
+        </form>

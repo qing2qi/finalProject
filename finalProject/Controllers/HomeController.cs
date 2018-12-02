@@ -9,6 +9,7 @@ using IEXTrading.Models;
 using IEXTrading.Models.ViewModel;
 using IEXTrading.DataAccess;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace MVCTemplate.Controllers
 {
@@ -37,12 +38,13 @@ namespace MVCTemplate.Controllers
             IEXHandler webHandler = new IEXHandler();
             List<Company> companies = webHandler.GetSymbols();
 
-            //Save comapnies in TempData
-            TempData["Companies"] = JsonConvert.SerializeObject(companies);
+            String companiesData = JsonConvert.SerializeObject(companies);
+            //int size = System.Text.ASCIIEncoding.ASCII.GetByteCount(companiesData);
+            String sessionKeyName = "getAllSymbols";
+            HttpContext.Session.SetString(sessionKeyName, companiesData);
 
             return View(companies);
         }
-
         /****
          * The Chart action calls the GetChart method that returns 1 year's equities for the passed symbol.
          * A ViewModel CompaniesEquities containing the list of companies, prices, volumes, avg price and volume.
@@ -83,13 +85,23 @@ namespace MVCTemplate.Controllers
         ****/
         public IActionResult PopulateSymbols()
         {
-            List<Company> companies = JsonConvert.DeserializeObject<List<Company>>(TempData["Companies"].ToString());
+            // reading JSON from the Session
+            string companiesData = HttpContext.Session.GetString("getAllSymbols");
+            List<Company> companies = null;
+            if (companiesData != "")
+            {
+                companies = JsonConvert.DeserializeObject<List<Company>>(companiesData);
+            }
+
             foreach (Company company in companies)
             {
-                //Database will give PK constraint violation error when trying to insert record with existing PK.
-                //So add company only if it doesnt exist, check existence using symbol (PK)
+                //Database will give PK constraint violation error when trying to insert a record with existing PK.
+                //So add company only if it doesn't exist, check its existence using symbol (PK)
+
+
                 if (dbContext.Companies.Where(c => c.symbol.Equals(company.symbol)).Count() == 0)
                 {
+                    
                     dbContext.Companies.Add(company);
                 }
             }
@@ -167,14 +179,20 @@ namespace MVCTemplate.Controllers
             double avgvol = equities.Average(e => e.volume) / 1000000; //Divide volume by million
             return new CompaniesEquities(companies, equities.Last(), dates, prices, volumes, avgprice, avgvol);
         }
+    
+        public IActionResult recommendType()
+        {
+            return View();
+        }
         /****
          * @author qing qi
          * Recommend stock by 52-Week Price Range Recommendation Strategy, which means you better to choose
          * the stock that the price change range is larger than 0.82(82%)
         ****/
-        public IActionResult recommend()
+        public IActionResult recommend(String stockType)
         {
             List<Company> companiesList = dbContext.Companies.ToList();
+            
             List<Equity> equities = new List<Equity>();
             List<Double> pricreRangeRateList = new List<double>();//all stock price increase rate
             List<String> symbolList = new List<String>();//all stock symbol
@@ -184,37 +202,38 @@ namespace MVCTemplate.Controllers
             string priceRangeRate = "";
             if (companiesList != null)
             {
+                int n = companiesList.Count;
+                if (companiesList.Count > 50) n = 50;
+                companiesList = companiesList.GetRange(0, n);
                 foreach (Company company in companiesList)
                 {
-                    IEXHandler webHandler = new IEXHandler();
-                    String symbol = company.symbol;
-                    symbolList.Add(symbol);
-                    equities = webHandler.GetChart(company.symbol);
-                    if (equities != null)
+                    if (company.type.Equals(stockType))//filter the companies, just get company with the type that user chose.
                     {
-                        equities = equities.OrderBy(c => c.date).ToList(); //Make sure the data is in ascending order of date.
-                        float maxprice = equities.Max(e => e.high);
-                        float minprice = equities.Min(e => e.low);
-                        Equity current = equities.Last();
-                        float currentPrice = current.high;
-                        double pricre_Range_Rate = 0.0;
-                        if (maxprice != minprice)//in case messy data makes the denominator zero below
+                        IEXHandler webHandler = new IEXHandler();
+                        String symbol = company.symbol;
+                        symbolList.Add(symbol);
+                        equities = webHandler.GetChart(company.symbol);
+                        if (equities != null && equities.Count != 0)
                         {
-                            pricre_Range_Rate = Math.Round((currentPrice - minprice) / (maxprice - minprice), 2);
+                            equities = equities.OrderBy(c => c.date).ToList(); //Make sure the data is in ascending order of date.
+                            float maxprice = equities.Max(e => e.high);
+                            float minprice = equities.Min(e => e.low);
+                            Equity current = equities.Last();
+                            float currentPrice = current.high;
+                            double pricre_Range_Rate = 0.0;
+                            if (maxprice != minprice)//in case messy data makes the denominator zero below
+                            {
+                                pricre_Range_Rate = Math.Round((currentPrice - minprice) / (maxprice - minprice), 2);
+                            }
+                            pricreRangeRateList.Add(pricre_Range_Rate);// for joinning to string below
+                            if (pricre_Range_Rate >= 0.82)// the stocks you better to choose
+                            {
+                                stockChose.Add(company);
+                                stockChosePrice.Add(pricre_Range_Rate);
+                            }
                         }
-                        pricreRangeRateList.Add(pricre_Range_Rate);// for joinning to string below
-                        if (pricre_Range_Rate >= 0.82)// the stocks you better to choose
-                        {
-                            stockChose.Add(company);
-                            stockChosePrice.Add(pricre_Range_Rate);
-                        }
-                        //if (dbContext.RecommendStocks.Where(c => c.symbol.Equals(symbol)).Count() == 0)
-                        //{
-
-                        //    StockRecommend priceScoreObj = new StockRecommend(symbol, company.name, current.date, company.isEnabled, pricre_Range_Rate);
-                        //    dbContext.RecommendStocks.Add(priceScoreObj);
-                        //}
                     }
+                   
                 }
                 if(pricreRangeRateList!=null&& symbolList != null) {
                     priceRangeRate = string.Join(",", pricreRangeRateList);//list to string for js use in the page
@@ -224,6 +243,7 @@ namespace MVCTemplate.Controllers
             RecommendStock RecommendStock = new RecommendStock(stockChose, stockChosePrice, symbolString, priceRangeRate);
             return View("recommend", RecommendStock);
         }
+        
         public IActionResult aboutUS()
         {
 
